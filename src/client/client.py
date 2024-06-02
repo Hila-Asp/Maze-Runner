@@ -148,7 +148,7 @@ def play():
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("A Player Has Exited The Game!", True, TEXT_COLOR)
-        text2 = font.render("You Are Being Sent Back To The Start", True, TEXT_COLOR)
+        text2 = font.render("You Are Being Sent Back To Home", True, TEXT_COLOR)
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
@@ -198,7 +198,7 @@ def waiting_screen():
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("A Player Has Exited The Game!", True, TEXT_COLOR)
-        text2 = font.render("You Are Being Sent Back To The Start", True, TEXT_COLOR)
+        text2 = font.render("You Are Being Sent Back To Home", True, TEXT_COLOR)
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
@@ -281,7 +281,7 @@ def instructions():
                                                  TEXT_COLOR)
     WINDOW.blit(instructions_text, (20, 350))
 
-    back_button = Button("Back to start", (SCREEN_WIDTH - 400) / 2, SCREEN_HEIGHT * 0.8, TEXT_COLOR, BACKGROUND_COLOR,
+    back_button = Button("Back to Home", (SCREEN_WIDTH - 400) / 2, SCREEN_HEIGHT * 0.8, TEXT_COLOR, BACKGROUND_COLOR,
                          400, 100, FONT_TYPE, 40)
     back_button.draw(WINDOW)
     run = True
