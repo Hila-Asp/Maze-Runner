@@ -15,7 +15,7 @@ PORT = 5555
 PLAYERS_LIST = []
 CLIENTS_LIST = []
 MAP = Map()
-GAME_MAP = MAP.create_block_list(random.randint(0, len(MAP.map_options_list)) - 1)
+GAME_MAP = MAP.create_block_list()
 MOVE_VELOCITY = 27
 SERVER_CERT = "C:/Networks/Final_Project/Server_certificates/server.crt"
 SERVER_KEY = "C:/Networks/Final_Project/Server_certificates/server.key"
@@ -110,10 +110,10 @@ def gets_info_from_client(client, username):
             CURRENT_PLAYER = 0
             CATCHER_COUNT = 1
             PLAYERS_LIST.clear()
-            GAME_MAP = MAP.create_block_list(random.randint(0, len(MAP.map_options_list)) - 1)
+            GAME_MAP = MAP.create_block_list()
             client.close()
             return
-        if type(move) == list:
+        if type(move) == list:  # The data is the map that the client created
             for i in range(len(move)):  # map to save
                 move[i] = str(move[i])
             block_locations_string = '/'.join(move)
@@ -146,7 +146,7 @@ def gets_info_from_client(client, username):
             CURRENT_PLAYER = 0
             CATCHER_COUNT = 1
             RUNNER_ID = random.randint(0, NUMBER_OF_PLAYERS - 1)
-            GAME_MAP = MAP.create_block_list(random.randint(0, len(MAP.map_options_list)) - 1)
+            GAME_MAP = MAP.create_block_list()
         elif move == "exit":  # If a player exits while playing the game or int the waiting room from closing the window - graceful
             print(f"{client.getpeername()} has exited the game")
             CLIENTS_LIST.remove(client)
@@ -155,7 +155,7 @@ def gets_info_from_client(client, username):
             CURRENT_PLAYER = 0
             CATCHER_COUNT = 1
             PLAYERS_LIST.clear()
-            GAME_MAP = MAP.create_block_list(random.randint(0, len(MAP.map_options_list)) - 1)
+            GAME_MAP = MAP.create_block_list()
             client.close()
             break
         elif move == "leave":  # If a player exits in the home screen - graceful
