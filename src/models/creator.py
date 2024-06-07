@@ -16,8 +16,10 @@ FRAME_LOCATIONS = [(0, 0), (0, 27), (0, 81), (27, 0), (54, 0), (81, 0), (108, 0)
                    (648, 108), (648, 189), (648, 270), (648, 324), (648, 432), (648, 621)]
 # A list of the players start location
 PLAYERS_LOCATION_LIST = [(567, 324), (54, 297), (81, 297), (54, 324), (81, 324), (54, 351), (81, 351)]
-ROW_LENGTH = 25  # There are 25 blocks in a row
-COLUMN_LENGTH = 25  # There are 25 blocks in a column
+# There are 25 blocks in a row
+ROW_LENGTH = 25
+# There are 25 blocks in a column
+COLUMN_LENGTH = 25
 BLOCK_HEIGHT = 27
 BLOCK_WIDTH = 27
 GAME_SCREEN_HEIGHT = 675
@@ -31,8 +33,10 @@ BUTTONS_LIST = [Button("Reset", 75, GAME_SCREEN_HEIGHT, (70, 70, 70), (255, 255,
 
 class Creator:
     def __init__(self):
-        self.block_locations = FRAME_LOCATIONS.copy()  # A list of the locations of the blocks
-        self.buttons_list = BUTTONS_LIST  # A list of the buttons that appear on the screen
+        # A list of the locations of the blocks
+        self.block_locations = FRAME_LOCATIONS.copy()
+        # A list of the buttons that appear on the screen
+        self.buttons_list = BUTTONS_LIST
 
     def draw(self, window):
         """
@@ -54,27 +58,36 @@ class Creator:
                 if event.type == pygame.QUIT:
                     return
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    # if pressed the mouse
                     pos = pygame.mouse.get_pos()
-                    if pos[1] <= GAME_SCREEN_HEIGHT:  # If in screen
+                    if pos[1] <= GAME_SCREEN_HEIGHT:
+                        # If in screen
                         x = pos[0] // BLOCK_WIDTH
                         y = pos[1] // BLOCK_HEIGHT
                         pos = (x * BLOCK_WIDTH, y * BLOCK_HEIGHT)
-                        if pos in FRAME_LOCATIONS or pos in PLAYERS_LOCATION_LIST:  # If clicked on the frame or the players start location nothing changes
+                        if pos in FRAME_LOCATIONS or pos in PLAYERS_LOCATION_LIST:
+                            # If clicked on the frame or the players start location nothing changes
                             pass
-                        elif pos in self.block_locations:  # If clicked on a existing block - removes the block
+                        elif pos in self.block_locations:
+                            # If clicked on a existing block - removes the block
                             self.block_locations.remove(pos)
                         else:
                             self.block_locations.append(pos)
-                    elif self.buttons_list[0].click(pos):  # Pressed reset button
+                    elif self.buttons_list[0].click(pos):
+                        # Pressed reset button
                         self.block_locations = FRAME_LOCATIONS.copy()
                     elif self.buttons_list[2].click(pos):
                         return
-                    elif self.buttons_list[1].click(pos):  # Presses save button
+                    elif self.buttons_list[1].click(pos):
+                        # Presses save button
                         return self.block_locations
                     window.fill((128, 128, 128))
 
+                    # Draws the blocks on the screen
                     for b in self.block_locations:
                         window.blit(BLOCK_TEXTURE, b)
+
+                    # Draws the buttons on the screen
                     self.buttons_list[0].draw(window)
                     self.buttons_list[1].draw(window)
                     self.buttons_list[2].draw(window)

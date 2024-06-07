@@ -22,18 +22,24 @@ INSTRUCTIONS_RUNNER_PICTURE = Pictures().instructions_runner_scaled
 FONT_TYPE = "papyrus"
 TEXT_COLOR = (40, 40, 40)
 SERVER_PORT = 5555
-SERVER_IP = "www.HilaFinalProject.com"  # In the hosts file in the computer, www.HilaFinalProject.com points to the server's IP
+# In the hosts file in the computer, www.HilaFinalProject.com points to the server's IP
+SERVER_IP = "www.HilaFinalProject.com"
 WAITING = True
 EXIT_CODE = 0
-PLAYER_PIC_WIDTH_HEIGHT = 75  # This is the width and height of the character that will be showed in the waiting room
+# This is the width and height of the character that will be showed in the waiting room
+PLAYER_PIC_WIDTH_HEIGHT = 75
 CA_CERT = "C:/Networks/Final_Project/CA_certificate/CA.pem"
 TOO_MANY_PLAYERS_ERROR_CODE = 999
 PLAYER_EXITED_WAITING_CODE = 1
 SERVER_TERMINATED_CODE = 2
-MONITOR = screeninfo.get_monitors()[0]  # A dictionary with info on the screen
-PLAYER = None  # Will get it later on from the server
-WINDOW = None  # Later on, when the player logs in/registers - will become the window (screen) of the game
-SECURE_SOCKET = None  # Later on, when player logs in/registers - will become the socket that the player communicates with
+# A dictionary with info on the screen
+MONITOR = screeninfo.get_monitors()[0]
+# Will get it later on from the server
+PLAYER = None
+# Later on, when the player logs in/registers - will become the window (screen) of the game
+WINDOW = None
+# Later on, when player logs in/registers - will become the socket that the player communicates with
+SECURE_SOCKET = None
 
 
 def redraw_window(players, game_map):
@@ -44,9 +50,11 @@ def redraw_window(players, game_map):
     """
     WINDOW.fill(BACKGROUND_COLOR)
     WINDOW.blit(BACKGROUND_TEXTURE, (0, 0))
-    for location in game_map:  # Draws the blocks on the screen
+    # Draws the blocks on the screen
+    for location in game_map:
         WINDOW.blit(BLOCK_TEXTURE, location)
-    for pl in players:  # Draws the players on the screen
+    # Draws the players on the screen
+    for pl in players:
         pl.draw(WINDOW)
     font = pygame.font.SysFont(FONT_TYPE, 20)
     if PLAYER.is_runner:
@@ -65,44 +73,56 @@ def get_info_from_server():
     global WAITING, EXIT_CODE, PLAYER
     try:
         game_map = pickle.loads(SECURE_SOCKET.recv(8192))
-    except (pickle.PickleError, socket.error):  # If the server terminated in the waiting screen
+    except (pickle.PickleError, socket.error):
+        # If the server terminated in the waiting screen
         WAITING = False
         EXIT_CODE = SERVER_TERMINATED_CODE
-        return  # Stops thread. Returns to waiting_screen() out of the while WAITING loop
-    if type(game_map) == str and game_map == "home":  # If exited in the waiting screen
+        return
+        # Stops thread. Returns to waiting_screen() out of the while WAITING loop
+    if type(game_map) == str and game_map == "home":
+        # If exited in the waiting screen
         EXIT_CODE = PLAYER_EXITED_WAITING_CODE
         WAITING = False
-        return  # Stops thread. Returns to waiting_screen() out of the while WAITING loop
+        return
+        # Stops thread. Returns to waiting_screen() out of the while WAITING loop
     else:
         WAITING = False
     while not WAITING:
-        try:  # If the server terminated while the game was active
+        try:
+            # If the server terminated while the game was active
             players = pickle.loads(SECURE_SOCKET.recv(4096))
         except (pickle.PickleError, socket.error):
             WAITING = True
             EXIT_CODE = SERVER_TERMINATED_CODE
-            return  # Stops thread. Returns to play() out of the while not WAITING loop
+            return
+            # Stops thread. Returns to play() out of the while not WAITING loop
 
         if type(players) == str and players == "home":
             EXIT_CODE = PLAYER_EXITED_WAITING_CODE
             WAITING = True
             break
-        elif type(players) == dict:  # Game ended the dictionary is the players stats
+        elif type(players) == dict:
+            # Game ended the dictionary is the players stats
             font = pygame.font.SysFont(FONT_TYPE, 100)
             text = font.render("Game Over!", True, TEXT_COLOR)
+            # Displays "Game Over!"
             WINDOW.blit(text, ((SCREEN_WIDTH - text.get_width()) / 2, (SCREEN_HEIGHT - text.get_height()) / 2))
+
             font2 = pygame.font.SysFont(FONT_TYPE, 30)
             text2 = font2.render(
                 f'games played as runner: {players.get("games played as runner")}  avg runner steps:'
                 f' {players.get("avg runner steps")}\n games played as catcher: '
                 f'{players.get("games played as catcher")} avg catcher steps: {players.get("avg catcher steps")}\n ',
                 True, TEXT_COLOR)
+            # Displays the player's stats
             WINDOW.blit(text2, ((SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text2.get_height()) / 2 + 200))
+
             pygame.display.update()
             pygame.time.delay(5000)
             PLAYER.steps = 0
             WAITING = True
-        else:  # Draws the window again and updates the player
+        else:
+            # Draws the window again and updates the player
             PLAYER = players[PLAYER.p_index]
             redraw_window(players, game_map)
 
@@ -116,10 +136,13 @@ def play():
     while not WAITING:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # Player exited, closes the screen and stops the game
                 SECURE_SOCKET.send(pickle.dumps("exit"))
                 pygame.quit()
-                return  # Player exited, closes the screen and stops the game
+                SECURE_SOCKET.close()
+                return
             if event.type == pygame.KEYDOWN:
+                # If the client pressed on the keyboard
                 if event.key == pygame.K_RIGHT:
                     SECURE_SOCKET.send(pickle.dumps("RIGHT"))
                 if event.key == pygame.K_LEFT:
@@ -130,13 +153,16 @@ def play():
                     SECURE_SOCKET.send(pickle.dumps("DOWN"))
 
     if SERVER_TERMINATED_CODE == EXIT_CODE:
+        # The server Terminated- a message is shown and the client is sent back to the start screen
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("The Server Terminated The Game", True, TEXT_COLOR)
         text2 = font.render("You Need To Login Again", True, TEXT_COLOR)
+        # Displays a message that the server terminated
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
         pygame.display.update()
         pygame.time.delay(2000)
         SECURE_SOCKET.close()
@@ -145,22 +171,27 @@ def play():
         WAITING = True
         main()
     elif EXIT_CODE == PLAYER_EXITED_WAITING_CODE:
+        # A player exited the game- a message is shown and the client is sent back to the home screen
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("A Player Has Exited The Game!", True, TEXT_COLOR)
         text2 = font.render("You Are Being Sent Back To Home", True, TEXT_COLOR)
+        # displays a message that a player has exited the game
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
         pygame.display.update()
         pygame.time.delay(2000)
         SECURE_SOCKET.send((pickle.dumps("clear")))
         EXIT_CODE = 0
         WAITING = True
         home_screen()
-    else:  # game ended
+    else:
+        # game ended
         SECURE_SOCKET.send((pickle.dumps("clear")))
-        home_screen()  # Returns to main screen if another player exited the game
+        # Returns to main screen if another player exited the game
+        home_screen()
 
 
 def waiting_screen():
@@ -172,15 +203,20 @@ def waiting_screen():
     while WAITING:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # Player exited, closes the screen and stops the game
                 SECURE_SOCKET.send(pickle.dumps("exit"))
                 pygame.quit()
-                return  # Player exited, closes the screen and stops the game
+                SECURE_SOCKET.close()
+                return
 
-        if WAITING:  # If no one exited the waiting room
+        if WAITING:
+            # If no one exited the waiting room
             WINDOW.fill(BACKGROUND_COLOR)
             font = pygame.font.SysFont(FONT_TYPE, 70)
             text = font.render("Waiting For Players...", True, TEXT_COLOR)
+            # Displays the "waiting for players..." message
             WINDOW.blit(text, ((SCREEN_WIDTH - text.get_width()) / 2, (SCREEN_HEIGHT - text.get_height()) / 2 - 100))
+
             font2 = pygame.font.SysFont(FONT_TYPE, 50)
             if PLAYER.is_runner:
                 text2 = font2.render("You Are The Runner", True, TEXT_COLOR)
@@ -189,19 +225,24 @@ def waiting_screen():
             WINDOW.blit(text2, ((SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text2.get_height()) / 2 + 50))
             player_pic = pygame.image.load(PLAYER.img_address)
             player_pic = pygame.transform.scale(player_pic, (PLAYER_PIC_WIDTH_HEIGHT, PLAYER_PIC_WIDTH_HEIGHT))
+            # Displays the player the client is going to play as
             WINDOW.blit(player_pic,
                         ((SCREEN_WIDTH - PLAYER_PIC_WIDTH_HEIGHT) / 2,
                          (SCREEN_HEIGHT - PLAYER_PIC_WIDTH_HEIGHT) / 2 + 200))
+
             pygame.display.update()
 
     if EXIT_CODE == PLAYER_EXITED_WAITING_CODE:
+        # A player exited the game- a message is shown and the client is sent back to the home screen
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("A Player Has Exited The Game!", True, TEXT_COLOR)
         text2 = font.render("You Are Being Sent Back To Home", True, TEXT_COLOR)
+        # displays a message that a player has exited the game
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
         pygame.display.update()
         pygame.time.delay(2000)
         SECURE_SOCKET.send((pickle.dumps("clear")))
@@ -209,13 +250,16 @@ def waiting_screen():
         WAITING = True
         home_screen()
     elif EXIT_CODE == SERVER_TERMINATED_CODE:
+        # The server Terminated- a message is shown and the client is sent back to the start screen
         WINDOW.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont(FONT_TYPE, 35)
         text1 = font.render("The Server Terminated The Game", True, TEXT_COLOR)
         text2 = font.render("You Need To Login Again", True, TEXT_COLOR)
+        # Displays a message that the server terminated
         WINDOW.blit(text1, ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
         WINDOW.blit(text2, (
             (SCREEN_WIDTH - text2.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
         pygame.display.update()
         pygame.time.delay(2000)
         SECURE_SOCKET.close()
@@ -224,6 +268,7 @@ def waiting_screen():
         WAITING = True
         main()
     else:
+        # All the players joined, starting the game
         play()
 
 
@@ -232,11 +277,15 @@ def create_map():
     This function calls the Creator draw function then sends the server a map if the client saved it
     :return:
     """
+    # calls the draw() function of Creator class that presents the window that the client can create a map with
     block_list = Creator().draw(WINDOW)
     if block_list is not None:
+        # If the client saved the map
         try:
+            # Sends the server the map for it to save in Maps.txt
             SECURE_SOCKET.send(pickle.dumps(block_list))
         except (socket.error, pickle.PickleError):
+            # The server isn't active (it terminated)
             WINDOW.fill(BACKGROUND_COLOR)
             font = pygame.font.SysFont(FONT_TYPE, 35)
             text1 = font.render("The Server Terminated The Game", True, TEXT_COLOR)
@@ -249,6 +298,7 @@ def create_map():
             SECURE_SOCKET.close()
             pygame.quit()
             main()
+    # Returns to the home screen
     home_screen()
 
 
@@ -261,16 +311,18 @@ def instructions():
 
     title_font = pygame.font.SysFont(FONT_TYPE, 110)
     title_text = title_font.render("Instructions", True, TEXT_COLOR)
+    # Displays the title - "Instructions"
     WINDOW.blit(title_text, ((SCREEN_WIDTH - title_text.get_width()) / 2, 10))
 
     participants_font = pygame.font.SysFont(FONT_TYPE, 30)
     participants_text = participants_font.render("Participants:\n"
                                                  "1 Runner \n"
                                                  "1-6 Catchers", True, TEXT_COLOR)
+    # Displays the participants
     WINDOW.blit(participants_text, (20, 180))
 
+    # Displays the participant images
     WINDOW.blit(INSTRUCTIONS_CATCHERS_PICTURE, (200, 280))
-
     WINDOW.blit(INSTRUCTIONS_RUNNER_PICTURE, (150, 245))
 
     instructions_font = pygame.font.SysFont(FONT_TYPE, 30)
@@ -279,21 +331,26 @@ def instructions():
                                                  " The movement in the game is with the arrows on the \n keyboard.",
                                                  True,
                                                  TEXT_COLOR)
+    # Displays the instructions
     WINDOW.blit(instructions_text, (20, 350))
 
     back_button = Button("Back to Home", (SCREEN_WIDTH - 400) / 2, SCREEN_HEIGHT * 0.8, TEXT_COLOR, BACKGROUND_COLOR,
                          400, 100, FONT_TYPE, 40)
+    # displays the button
     back_button.draw(WINDOW)
     run = True
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # Player exited, closes the screen and stops the game
                 pygame.quit()
                 SECURE_SOCKET.send(pickle.dumps("leave"))
+                SECURE_SOCKET.close()
                 return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 if back_button.click(pos):
+                    # If the client pressed on the button to go back to the home screen
                     home_screen()
         pygame.display.update()
 
@@ -312,57 +369,87 @@ def home_screen():
 
     font = pygame.font.SysFont(FONT_TYPE, 110)
     text = font.render("Maze Runner", True, TEXT_COLOR)
+    # Displays the title - "Maze Runner"
     WINDOW.blit(text, ((SCREEN_WIDTH - text.get_width()) / 2, 10))
 
+    # creates buttons
     buttons = [Button("Instructions", 15, 500, TEXT_COLOR, BACKGROUND_COLOR, 210, 100, FONT_TYPE, 37),
                Button("Start Game", 232, 500, TEXT_COLOR, BACKGROUND_COLOR, 210, 100, FONT_TYPE, 37),
                Button("Create Map", 450, 500, TEXT_COLOR, BACKGROUND_COLOR, 210, 100, FONT_TYPE, 37)]
 
+    # displays the button
     for button in buttons:
         button.draw(WINDOW)
+
     pygame.display.update()
     run = True
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # Player exited, closes the screen and stops the game
                 pygame.quit()
                 try:
                     SECURE_SOCKET.send(pickle.dumps("leave"))
                 except (socket.error, pickle.PickleError):
+                    # If the server is not active
                     SECURE_SOCKET.close()
                 return
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # player presses the mouse
                 pos = pygame.mouse.get_pos()
                 if buttons[0].click(pos):
+                    # player pressed instructions
                     instructions()
                 if buttons[2].click(pos):
+                    # player pressed create map
                     create_map()
                 if buttons[1].click(pos):
+                    # player pressed start game
                     run = False
                     try:
-                        SECURE_SOCKET.send(pickle.dumps("start"))  # sends starting game
-                    except (pickle.PickleError, socket.error):  # Server terminated
+                        # sends starting game
+                        SECURE_SOCKET.send(pickle.dumps("start"))
+                    except (pickle.PickleError, socket.error):
+                        # Server terminated
                         WINDOW.fill(BACKGROUND_COLOR)
                         font = pygame.font.SysFont(FONT_TYPE, 35)
                         text1 = font.render("The Server Terminated The Game", True, TEXT_COLOR)
                         text2 = font.render("You Need To Login Again", True, TEXT_COLOR)
+                        # Displays a message that the server terminated
                         WINDOW.blit(text1,
                                     ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
                         WINDOW.blit(text2, (
                             (SCREEN_WIDTH - text2.get_width()) / 2,
                             (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
                         pygame.display.update()
                         pygame.time.delay(2000)
                         SECURE_SOCKET.close()
                         pygame.quit()
                         main()
                     try:
+                        # gets the player that the client plays as
                         PLAYER = pickle.loads(SECURE_SOCKET.recv(2048))
                     except (socket.error, pickle.PickleError):
-                        print("couldn't receive data from server")
+                        # Server terminated
+                        WINDOW.fill(BACKGROUND_COLOR)
+                        font = pygame.font.SysFont(FONT_TYPE, 35)
+                        text1 = font.render("The Server Terminated The Game", True, TEXT_COLOR)
+                        text2 = font.render("You Need To Login Again", True, TEXT_COLOR)
+                        # Displays a message that the server terminated
+                        WINDOW.blit(text1,
+                                    ((SCREEN_WIDTH - text1.get_width()) / 2, (SCREEN_HEIGHT - text1.get_height()) / 2))
+                        WINDOW.blit(text2, (
+                            (SCREEN_WIDTH - text2.get_width()) / 2,
+                            (SCREEN_HEIGHT - text1.get_height()) / 2 + text1.get_height()))
+
+                        pygame.display.update()
+                        pygame.time.delay(2000)
                         SECURE_SOCKET.close()
-                        main()  # if there is a error the client returns to the start screen
+                        pygame.quit()
+                        main()
                     if PLAYER == TOO_MANY_PLAYERS_ERROR_CODE:
+                        # There are too many players in the game, client can't join
                         WINDOW.fill(BACKGROUND_COLOR)
                         font = pygame.font.SysFont(FONT_TYPE, 40)
                         text = font.render("Can't Join Game, Too Much Players", True, TEXT_COLOR)
@@ -370,6 +457,7 @@ def home_screen():
                                     ((SCREEN_WIDTH - text.get_width()) / 2, (SCREEN_HEIGHT - text.get_height()) / 2))
                         pygame.display.update()
                         pygame.time.delay(3000)
+                        # goes back to home screen
                         home_screen()
                     else:
                         thread = threading.Thread(target=get_info_from_server)
@@ -393,14 +481,16 @@ def login_screen(form, frame):
     :param form: The tkinter form that is shown
     :param frame: The designed screen
     """
-    frame.destroy()  # destroys the earlier screen
+    # destroys the earlier screen
+    frame.destroy()
     form.title("Login form")
-    form.geometry(
-        f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')  # this is the size of the small screen that opens up
-    form.configure(bg='#808080')  # This is the background color the will appear when making the screen bigger
+    # this is the size and the location of the small screen that opens up
+    form.geometry(f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')
+    # This is the background color the will appear when making the screen bigger
+    form.configure(bg='#808080')
     frame = tkinter.Frame(bg='#808080')
 
-    # Creating widgets
+    # Creating labels, entries and buttons
     login_label = tkinter.Label(frame, text="Login", bg='#808080', fg="#282828", font=(FONT_TYPE, 30))
     username_label = tkinter.Label(frame, text="Username", bg='#808080', fg="#282828", font=(FONT_TYPE, 20))
     username_entry = tkinter.Entry(frame, font=(FONT_TYPE, 16))
@@ -411,6 +501,7 @@ def login_screen(form, frame):
     register_button = tkinter.Button(frame, text="Register", bg="#282828", fg="#808080", font=(FONT_TYPE, 10),
                                      command=lambda: register_screen(form, frame))
 
+    # Places the buttons, labels and entries on the screen
     login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=10)
     username_label.grid(row=1, column=0)
     username_entry.grid(row=1, column=1, pady=20)
@@ -444,6 +535,7 @@ def login(form, username, password):
     # wraps the socket to create a new secure socket
     SECURE_SOCKET = context.wrap_socket(client, server_hostname=SERVER_IP)
     try:
+        # connects to the server
         SECURE_SOCKET.connect((SERVER_IP, SERVER_PORT))
         print("client connected")
     except socket.error as e:
@@ -452,12 +544,14 @@ def login(form, username, password):
         return
 
     try:
+        # Sends login info and receives if the login is successful
         SECURE_SOCKET.send(pickle.dumps(("login", username, password)))
         logged = pickle.loads((SECURE_SOCKET.recv(1024)))
     except (socket.error, pickle.PickleError):
         messagebox.showinfo(title="Connection to Server", message="Cant receive or send information to the server")
         return
     if logged:
+        # Login successful
         form.destroy()
         create_window()
     else:
@@ -471,14 +565,16 @@ def register_screen(form, frame):
     :param form: The tkinter form that is shown
     :param frame: The designed screen
     """
-    frame.destroy()  # destroys the earlier screen
+    # destroys the earlier screen
+    frame.destroy()
     form.title("Register form")
-    form.geometry(
-        f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')  # this is the size of the small screen that opens up
-    form.configure(bg='#808080')  # This is the background color the will appear when making the screen bigger
+    # this is the size and the location of the small screen that opens up
+    form.geometry(f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')
+    # This is the background color the will appear when making the screen bigger
+    form.configure(bg='#808080')
     frame = tkinter.Frame(bg='#808080')
 
-    # Creating widgets
+    # Creating labels, entries and buttons
     register_label = tkinter.Label(frame, text="Register", bg='#808080', fg="#282828", font=(FONT_TYPE, 30))
     username_label = tkinter.Label(frame, text="Username", bg='#808080', fg="#282828", font=(FONT_TYPE, 20))
     username_entry = tkinter.Entry(frame, font=(FONT_TYPE, 16))
@@ -493,6 +589,7 @@ def register_screen(form, frame):
                                      command=lambda: register(form, username_entry.get(), password_entry.get(),
                                                               password_validation_entry.get()))
 
+    # Places the buttons, labels and entries on the screen
     register_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=10)
     username_label.grid(row=1, column=0)
     username_entry.grid(row=1, column=1, pady=15)
@@ -536,18 +633,21 @@ def register(form, username, password, password_validation):
     # wraps the socket to create a new secure socket
     SECURE_SOCKET = context.wrap_socket(client, server_hostname=SERVER_IP)
     try:
+        # connects to the server
         SECURE_SOCKET.connect((SERVER_IP, SERVER_PORT))
         print("client connected")
     except socket.error:
         messagebox.showinfo(title="Connection to Server", message="Can't connect to server")
         return
     try:
+        # Sends registration info and receives if the registration is successful
         SECURE_SOCKET.send(pickle.dumps(("register", username, password)))
         registered = pickle.loads((SECURE_SOCKET.recv(1024)))
     except (socket.error, pickle.PickleError):
         messagebox.showinfo(title="Connection to Server", message="Cant receive or send information to the server")
         return
     if registered:
+        # Registration successful
         form.destroy()
         create_window()
     else:
@@ -562,18 +662,23 @@ def main():
     """
     form = tkinter.Tk()
     form.title("Home Screen")
-    form.geometry(
-        f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')  # this is the size of the small screen that opens up
-    form.configure(bg='#808080')  # This is the background color the will appear when making the screen bigger
-    frame = tkinter.Frame(bg='#808080')  # this is the screen
+    # this is the size and the location of the small screen that opens up
+    form.geometry(f'440x440+{MONITOR.width // 2 - 440 // 2}+{MONITOR.height // 2 - 440 // 2}')
+    # This is the background color the will appear when making the screen bigger
+    form.configure(bg='#808080')
+    # this is the screen
+    frame = tkinter.Frame(bg='#808080')
 
+    # creates the title label
     welcome_label = tkinter.Label(frame, text="Welcome", bg='#808080', fg="#282828", font=(FONT_TYPE, 50))
+
+    # Creates buttons
     login_button = tkinter.Button(frame, text=" Login ", bg="#282828", fg="#808080", font=(FONT_TYPE, 20),
                                   command=lambda: login_screen(form, frame))
     register_button = tkinter.Button(frame, text="Register", bg="#282828", fg="#808080", font=(FONT_TYPE, 20),
                                      command=lambda: register_screen(form, frame))
 
-    # Places the buttons and texts on the screen
+    # Places the buttons and labels on the screen
     login_button.grid(row=1, column=0, columnspan=2, pady=20)
     register_button.grid(row=2, column=0, columnspan=2, pady=30)
     welcome_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=30)

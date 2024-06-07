@@ -9,13 +9,20 @@ PLAYERS_LOCATION_LIST = [(567, 324), (54, 297), (81, 297), (54, 324), (81, 324),
 
 class Player:
     def __init__(self, p, is_runner, catcher_number, username):
-        self.p_index = p  # players' index in the players list at the server
-        self.is_runner = is_runner  # If the player is the runner or not
-        self.catcher_number = catcher_number  # If the player is the runner the value is -1
-        self.username = username  # The username of the client that plays as this player
-        self.x, self.y = self.__get_x_and_y()  # Players location
-        self.img_address = self.__get_skin()  # the players' image address
-        self.steps = 0  # The number of steps the player did
+        # players' index in the players list at the server
+        self.p_index = p
+        # If the player is the runner or not
+        self.is_runner = is_runner
+        # If the player is the runner the value is -1
+        self.catcher_number = catcher_number
+        # The username of the client that plays as this player
+        self.username = username
+        # Player's location
+        self.x, self.y = self.__get_x_and_y()
+        # the players' image address
+        self.img_address = self.__get_skin()
+        # The number of steps the player did
+        self.steps = 0
 
     def __get_x_and_y(self):
         """
@@ -50,4 +57,7 @@ class Player:
         window.blit(img, (self.x, self.y))
 
     def __str__(self):
+        """
+        :return: the string of the values of this class
+        """
         return f"p= {self.p_index} x= {self.x} y= {self.y} is_runner: {self.is_runner}  catcher number {self.catcher_number} steps = {self.steps} username = {self.username}"

@@ -3,15 +3,24 @@ import pygame
 
 class Button:
     def __init__(self, text, x, y, button_color, text_color, width, height, font, text_size):
-        self.text = text  # The text that will be on the button
-        self.x = x  # The x value of the buttons' location
-        self.y = y  # The y value of the buttons' location
-        self.button_color = button_color  # The color of the button
-        self.text_color = text_color  # The color of the text on the button
-        self.width = width  # The width of the button
-        self.height = height  # The height of the button
-        self.font = font  # The font type that the text on the button will be
-        self.text_size = text_size  # The size of the text on the button
+        # The text that will be on the button
+        self.text = text
+        # The x value of the buttons' location
+        self.x = x
+        # The y value of the buttons' location
+        self.y = y
+        # The color of the button
+        self.button_color = button_color
+        # The color of the text on the button
+        self.text_color = text_color
+        # The width of the button
+        self.width = width
+        # The height of the button
+        self.height = height
+        # The font type that the text on the button will be
+        self.font = font
+        # The size of the text on the button
+        self.text_size = text_size
 
     def draw(self, window):
         """"
@@ -34,6 +43,7 @@ class Button:
         x1 = pos[0]
         y1 = pos[1]
         if self.x <= x1 <= self.x + self.width and self.y <= y1 <= self.y + self.height:
+            # If pressed the button
             return True
         else:
             return False

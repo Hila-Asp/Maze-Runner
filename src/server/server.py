@@ -10,7 +10,8 @@ from models.player import Player
 from models.map import Map
 
 READY = False
-SERVER_IP = "localhost"  # If playing with a client in another computer, change to the ip address
+# If playing with a client in another computer, change to the ip address
+SERVER_IP = "localhost"
 PORT = 5555
 PLAYERS_LIST = []
 CLIENTS_LIST = []
@@ -24,8 +25,10 @@ MAP_DOCUMENT_FILE_PATH = "C:/Networks/Final_Project/map/Maps.txt"
 CURRENT_PLAYER = 0
 CATCHER_COUNT = 1
 TOO_MANY_PLAYERS_ERROR_CODE = 999
-NUMBER_OF_PLAYERS = int(sys.argv[2])  # it assumes that the parameter is correct 2-7
-RUNNER_ID = random.randint(0, NUMBER_OF_PLAYERS - 1)  # Represents which of the players will be the runner
+# between 2-7
+NUMBER_OF_PLAYERS = int(sys.argv[2])
+# Represents which one of the players will be the runner
+RUNNER_ID = random.randint(0, NUMBER_OF_PLAYERS - 1)
 SERVER_PEPPER = b"$2b$12$"
 USER_PEPPER = b"#53$35#$"
 JOINED_USERS = []
@@ -38,7 +41,8 @@ def move_player(player_num, player_move):
     :param player_move: What move the player made - "UP", "DOWN", "LEFT", "RIGHT"
     """
     global PLAYERS_LIST
-    PLAYERS_LIST[player_num].steps += 1  # adds a step
+    # adds a step to the player
+    PLAYERS_LIST[player_num].steps += 1
     x = PLAYERS_LIST[player_num].x
     y = PLAYERS_LIST[player_num].y
     if player_move == "RIGHT":
@@ -50,7 +54,8 @@ def move_player(player_num, player_move):
     else:
         loc = (x, y + MOVE_VELOCITY)
 
-    catchers_location_list = []  # List of players locations
+    # List of players locations
+    catchers_location_list = []
     runner_loc = ()
     for player in PLAYERS_LIST:
         if not player.is_runner:
@@ -58,19 +63,24 @@ def move_player(player_num, player_move):
         else:
             runner_loc = (player.x, player.y)
 
-    if loc in GAME_MAP:  # If new location is a block player doesnt move
+    if loc in GAME_MAP:
+        # If new location is a block player doesnt move
         loc = (x, y)
     elif (player_num == RUNNER_ID and loc in catchers_location_list) \
-            or (player_num != RUNNER_ID and loc == runner_loc):  # Check for collision - Game ends
-        with open(JSON_FILE_PATH, "r+") as f:  # updates steps and games played
+            or (player_num != RUNNER_ID and loc == runner_loc):
+        # Check for collision - Game ends
+        with open(JSON_FILE_PATH, "r+") as f:
+            # updates steps and games played
             data = json.load(f)
             for j, p in enumerate(PLAYERS_LIST):
                 for i, user in enumerate(data["users"]):
                     if p.username == user.get("username"):
-                        if p.is_runner:  # player is the runner
+                        if p.is_runner:
+                            # player is the runner
                             data["users"][i]["games played as runner"] += 1
                             data["users"][i]["avg runner steps"] = round((data["users"][i]["avg runner steps"] + p.steps)/data["users"][i]["games played as runner"])
-                        else:  # player is a catcher
+                        else:
+                            # player is a catcher
                             data["users"][i]["games played as catcher"] += 1
                             data["users"][i]["avg catcher steps"] = round((data["users"][i]["avg catcher steps"] + p.steps)/data["users"][i]["games played as catcher"])
 
@@ -97,13 +107,16 @@ def gets_info_from_client(client, username):
     :param client: The connection to the client
     """
     global GAME_MAP, CURRENT_PLAYER, CATCHER_COUNT, RUNNER_ID
-    player_num = None  # when player starts game this will become a number
+    # when player starts game this will become a number
+    player_num = None
     while True:
         try:
             move = pickle.loads(client.recv(4096))
-        except (socket.error, pickle.PickleError):  # If client closed with termination - non-graceful
+        except (socket.error, pickle.PickleError):
+            # If client closed with termination - non-graceful
             print(f"{client.getpeername()} terminated")
-            if client in CLIENTS_LIST:  # if client terminates in home screen client is not in the list
+            if client in CLIENTS_LIST:
+                # if client terminates in home screen client is not in the list
                 CLIENTS_LIST.remove(client)
             JOINED_USERS.remove(username)
             send_go_to_home()
@@ -113,16 +126,19 @@ def gets_info_from_client(client, username):
             GAME_MAP = MAP.create_block_list()
             client.close()
             return
-        if type(move) == list:  # The data is the map that the client created
-            for i in range(len(move)):  # map to save
+        if type(move) == list:
+            # The data is the map that the client created
+            for i in range(len(move)):
+                # map to save
                 move[i] = str(move[i])
             block_locations_string = '/'.join(move)
             input_file = open(MAP_DOCUMENT_FILE_PATH, 'a')
             input_file.write(block_locations_string + "\n")
             input_file.close()
-        elif move == "start":  # Player started game
-            # If too many players have entered, return an error code to the newest player
+        elif move == "start":
+            # Player started game
             if CURRENT_PLAYER > NUMBER_OF_PLAYERS - 1:
+                # If too many players have entered, return an error code to the newest player
                 client.send(pickle.dumps(TOO_MANY_PLAYERS_ERROR_CODE))
             else:
                 if CURRENT_PLAYER == RUNNER_ID:
@@ -131,23 +147,29 @@ def gets_info_from_client(client, username):
                     player = Player(CURRENT_PLAYER, is_runner=False, catcher_number=CATCHER_COUNT, username=username)
                     CATCHER_COUNT += 1
                 player_num = CURRENT_PLAYER
-                CLIENTS_LIST.append(client)  # adds player to list
+                CLIENTS_LIST.append(client)
+                # adds player to list
                 PLAYERS_LIST.append(player)
                 client.send(pickle.dumps(player))
                 CURRENT_PLAYER += 1
-                if len(CLIENTS_LIST) == NUMBER_OF_PLAYERS:  # If all the players joined the game
+                if len(CLIENTS_LIST) == NUMBER_OF_PLAYERS:
+                    # If all the players joined the game
                     for connection in CLIENTS_LIST:
-                        connection.send(pickle.dumps(GAME_MAP))  # Sends the client the game map- this represents the start of the game
-        elif move == "get":  # Sends the players list
+                        # Sends the client the game map- this represents the start of the game
+                        connection.send(pickle.dumps(GAME_MAP))
+        elif move == "get":
+            # Sends the players list
             client.send(pickle.dumps(PLAYERS_LIST))
-        elif move == "clear":  # Resets the game
+        elif move == "clear":
+            # Resets the game
             CLIENTS_LIST.clear()
             PLAYERS_LIST.clear()
             CURRENT_PLAYER = 0
             CATCHER_COUNT = 1
             RUNNER_ID = random.randint(0, NUMBER_OF_PLAYERS - 1)
             GAME_MAP = MAP.create_block_list()
-        elif move == "exit":  # If a player exits while playing the game or int the waiting room from closing the window - graceful
+        elif move == "exit":
+            # If a player exits while playing the game or int the waiting room from closing the window - graceful
             print(f"{client.getpeername()} has exited the game")
             CLIENTS_LIST.remove(client)
             JOINED_USERS.remove(username)
@@ -158,7 +180,8 @@ def gets_info_from_client(client, username):
             GAME_MAP = MAP.create_block_list()
             client.close()
             break
-        elif move == "leave":  # If a player exits in the home screen - graceful
+        elif move == "leave":
+            # If a player exits in the home screen - graceful
             print(f"{client.getpeername()} left")
             client.close()
             JOINED_USERS.remove(username)
@@ -202,19 +225,24 @@ def check(action, username, password):
     :param password: The password of the player that wanted to connect
     :return: True if login/registration Successful. False if not
     """
-    password_bytes = password.encode() + USER_PEPPER  # hashing only works on bytes
+    # hashing only works on bytes
+    password_bytes = password.encode() + USER_PEPPER
 
     json_file = open(JSON_FILE_PATH, 'r+')
     data = json.load(json_file)
     found_user = False
     if action == "register":
-        for user in data["users"]:  # each user is a dictionary
+        for user in data["users"]:
+            # each user is a dictionary
             if user.get("username") == username:
                 found_user = True
-        if not found_user:  # new user - register
+        if not found_user:
+            # new user - register
             salt = bcrypt.gensalt()
-            hashed_password = bcrypt.hashpw((password_bytes + USER_PEPPER), salt)  # hashes the password
-            hashed_password = hashed_password.decode()  # decodes that the hashed password will not be in bytes, it will be string
+            # hashes the password
+            hashed_password = bcrypt.hashpw((password_bytes + USER_PEPPER), salt)
+            # decodes that the hashed password will not be in bytes, it will be string
+            hashed_password = hashed_password.decode()
             data["users"].append({"username": username, "password": hashed_password, "salt": salt.decode(),
                                   "games played as runner": 0, "games played as catcher": 0, "avg catcher steps": 0,
                                   "avg runner steps": 0})
@@ -225,21 +253,27 @@ def check(action, username, password):
             return True
         else:
             return False
-    else:  # action = "login"
+    else:
+        # action = "login"
         correct_password = False
-        for user in data["users"]:  # each user is a dictionary
+        for user in data["users"]:
+            # each user is a dictionary
             if user.get("username") == username:
                 found_user = True
                 if user.get("password") == bcrypt.hashpw((password_bytes + USER_PEPPER), user.get("salt").encode()).decode():
                     correct_password = True
         json_file.close()
-        if not found_user:  # username doesnt exist
+        if not found_user:
+            # username doesnt exist
             return False
-        elif not correct_password:  # username exists, not joined already, but wrong password
+        elif not correct_password:
+            # username exists, not joined already, but wrong password
             return False
-        elif username in JOINED_USERS:  # This user already joined
+        elif username in JOINED_USERS:
+            # This user already joined
             return False
-        else:  # valid username and password
+        else:
+            # valid username and password
             JOINED_USERS.append(username)
             return True
 
@@ -248,20 +282,23 @@ def main():
     """
     This is the main function for the server
     """
-    # checks the admin password that is in the configurations
+    # checks the admin password and the number of players that are in the configurations
     with open(JSON_FILE_PATH, 'r') as f:
         data = json.load(f)
         if bcrypt.hashpw((sys.argv[1].encode() + SERVER_PEPPER), data["server"]["salt"].encode()).decode() != \
                 data["server"]["password"]:
+            # admin password is incorrect
             print("admin password isn't correct. change the entered parameter and try again.")
             return
         elif not 2 <= int(sys.argv[2]) <= 7:
+            # the number of players isn't in the right range
             print("number of players isn't in the correct range. change the entered parameter and try again.")
             return
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
+        # binds the socket
         server.bind((SERVER_IP, PORT))
     except socket.error as e:
         print(f"Binding Server Socket Failed: {e}")
@@ -274,12 +311,16 @@ def main():
     context.load_cert_chain(certfile=SERVER_CERT, keyfile=SERVER_KEY)
 
     while True:
+        # accepts connection with client
         client, address = server.accept()
+        # Wraps socket to create a secure socket
         secure_connection = context.wrap_socket(client, server_side=True)
         print("New Client Joined: ", address)
+        # gets the action (login or register), the username and the password
         action, username, password = pickle.loads(secure_connection.recv(2048))
         logged_in = check(action, username, password)
         try:
+            # sends to client if the login/registration was successful
             secure_connection.send(pickle.dumps(logged_in))
         except (socket.error, pickle.PickleError):
             print(f"connection to {address} was closed")
