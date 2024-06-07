@@ -6,15 +6,6 @@
     },
     "users": [
         {
-            "username": "Hila",
-            "password": "$2b$12$5RH49Gfo9MlTo/Qih2mxU.BtqVfjSm4k9G0XInzuBOHKiL9C89y9W",
-            "salt": "$2b$12$5RH49Gfo9MlTo/Qih2mxU.",
-            "games played as runner": 8,
-            "games played as catcher": 3,
-            "avg catcher steps": 20,
-            "avg runner steps": 3
-        },
-        {
             "username": "Hello",
             "password": "$2b$12$e.uRCR3zxvXmuG6FRDw2yeiuwrzLXBJZAdZ.57K5izuf56slNgucO",
             "salt": "$2b$12$e.uRCR3zxvXmuG6FRDw2ye",
