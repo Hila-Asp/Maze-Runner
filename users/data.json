@@ -1,0 +1,72 @@
+{
+    "server": {
+        "username": "SERVER",
+        "password": "$2b$12$DVtXIZQFiw1sytN.N67mE.9N5a5u7dwSGp7vd55FBZcUTjP5Z2Z1u",
+        "salt": "$2b$12$DVtXIZQFiw1sytN.N67mE."
+    },
+    "users": [
+        {
+            "username": "Hila",
+            "password": "$2b$12$5RH49Gfo9MlTo/Qih2mxU.BtqVfjSm4k9G0XInzuBOHKiL9C89y9W",
+            "salt": "$2b$12$5RH49Gfo9MlTo/Qih2mxU.",
+            "games played as runner": 23,
+            "games played as catcher": 14,
+            "avg catcher steps": 8,
+            "avg runner steps": 2
+        },
+        {
+            "username": "Hello",
+            "password": "$2b$12$e.uRCR3zxvXmuG6FRDw2yeiuwrzLXBJZAdZ.57K5izuf56slNgucO",
+            "salt": "$2b$12$e.uRCR3zxvXmuG6FRDw2ye",
+            "games played as runner": 12,
+            "games played as catcher": 25,
+            "avg catcher steps": 1,
+            "avg runner steps": 2
+        },
+        {
+            "username": "Test2",
+            "password": "$2b$12$wQt2AHIfruWV0s54kWsgJudOo1osThJdUnGeSqYIa61pLe.LVp8..",
+            "salt": "$2b$12$wQt2AHIfruWV0s54kWsgJu",
+            "games played as runner": 0,
+            "games played as catcher": 0,
+            "avg catcher steps": 0,
+            "avg runner steps": 0
+        },
+        {
+            "username": "test",
+            "password": "$2b$12$hz8/Lo4mn6pmyUuWwqBBLe3tf6oDv.lTqhzDuYpl7RdBJn21XDV72",
+            "salt": "$2b$12$hz8/Lo4mn6pmyUuWwqBBLe",
+            "games played as runner": 2,
+            "games played as catcher": 2,
+            "avg catcher steps": 24,
+            "avg runner steps": 24
+        },
+        {
+            "username": "fgdfh",
+            "password": "$2b$12$mVWmwmLvfCuJJx/RzUpUIeP7up8akTeLbaRC5Na/YLumRGc9N1Dx.",
+            "salt": "$2b$12$mVWmwmLvfCuJJx/RzUpUIe",
+            "games played as runner": 1,
+            "games played as catcher": 0,
+            "avg catcher steps": 0,
+            "avg runner steps": 12
+        },
+        {
+            "username": "Sarit",
+            "password": "$2b$12$hwK31Xt6xOfS8bBr2/QyzuH5Zh4.5muBKUFvDL4UHOs/65T./On/q",
+            "salt": "$2b$12$hwK31Xt6xOfS8bBr2/Qyzu",
+            "games played as runner": 0,
+            "games played as catcher": 0,
+            "avg catcher steps": 0,
+            "avg runner steps": 0
+        },
+        {
+            "username": "reut",
+            "password": "$2b$12$8peFXxpFNozzUcKxmr58O.U1Cps8wP4BIfxjDVJF3tjQvdy2iooam",
+            "salt": "$2b$12$8peFXxpFNozzUcKxmr58O.",
+            "games played as runner": 0,
+            "games played as catcher": 0,
+            "avg catcher steps": 0,
+            "avg runner steps": 0
+        }
+    ]
+}
